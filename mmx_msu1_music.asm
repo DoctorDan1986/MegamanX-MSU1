@@ -8,27 +8,27 @@ MSU_AUDIO_TRACK_LO = $2004
 !MSU_AUDIO_CONTROL = $2007
 
 ; MSU_STATUS possible values
-MSU_STATUS_TRACK_MISSING = %00001000
-MSU_STATUS_AUDIO_PLAYING = %00010000
-MSU_STATUS_AUDIO_REPEAT  = %00100000
-MSU_STATUS_AUDIO_BUSY    = %01000000
-MSU_STATUS_DATA_BUSY     = %10000000
+MSU_STATUS_TRACK_MISSING = $8
+MSU_STATUS_AUDIO_PLAYING = %0001000
+MSU_STATUS_AUDIO_REPEAT  = %0010000
+MSU_STATUS_AUDIO_BUSY    = $40
+MSU_STATUS_DATA_BUSY     = %1000000
 
 org $8692B8
 	db "MSU1 Hack by DarkSho"
 
 ; This is the play music routine
 ; A = Music to play + $10
-org $8087B0
-	jsl CheckMSU
-	nop
-	nop
-
-org $8C8B4D
+org $8087AA
+	jsr CheckMSU
+	
+org $80FBCE
 CheckMSU:
+; Backup A and Y in 16bit mode
 	rep #$30
 	pha
 	phy
+	
 	sep #$30 ; Set all registers to 8 bit mode
 	tay
 	
@@ -48,9 +48,9 @@ MSUFound:
 	sbc #$F
 	sta MSU_AUDIO_TRACK_LO
 	stz !MSU_AUDIO_TRACK_HI
-	
+
 	lda MSU_STATUS
-	and.b #MSU_STATUS_TRACK_MISSING
+	and.b #$8
 	bne MSUNotFound
 	
 .CheckAudioStatus
@@ -62,13 +62,16 @@ MSUFound:
 	; Play the song and repeat it
 	lda #$01
 	sta !MSU_AUDIO_CONTROL
+
+	rep #$30
+	ply
+	pla
+	rts
 	
 MSUNotFound:
 	rep #$30
 	ply
 	pla
 	
-	sep #$30
-	tay
-	lda $806B,y
-	rtl
+	jsr $87B0
+	rts
