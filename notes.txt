@@ -2,12 +2,19 @@ LoROM 16MBit
 
 7EFFC8 = BGM en memoire (Options screen)
 
-$80/8708 ; Debut de la loop de data transfert vers le SPC700
 $80/885B ; Play sound, A = Sound to play
 
-; C'est la routine play music
-; La musique a jouer dans le lower byte de A et elle est multiplié par 2 (surement pour aider à indexer un tableau)
-$80/87AA 20 B0 87    JSR $87B0  [$80:87B0]   A:0116 X:000E Y:0006 P:envmXdiZc
+20 B0 87    JSR $87B0  [$80:87B0]
+$80/9A2D 4C B0 87    JMP $87B0  [$80:87B0]
+
+; Toutes les endroits ou la routine play music est appelle
+$80:8613 ; Capcom Logo
+$80:87AA ; Options Screen, All music after level music, Password Screen, Stage Select
+$80:8D8F ; Title Screen play sound (8CB5)
+9A2D ; Level music (C'est un JMP)
+9709 ; Stage Intro Jingle
+9CFA ; ???????
+ABD6 ; ???????
 
 Ne pas oublier que certaines musiques pause la musique en cours et ne call pas $87B0 (ex: Dr Light capsule)
 
@@ -17,7 +24,7 @@ Free Space = 0x60b4d / $8C:8B4D
 =====================
 = Music             =
 =====================
-00 = Capcom Jingle
+00 = Capcom Jingle (No Loop)
 01 = Intro Stage
 02 = Sting Cameleon
 03 = Launch Octopus
@@ -32,15 +39,15 @@ Free Space = 0x60b4d / $8C:8B4D
 0C = Simga Stage 3
 0D = Simga Stage 4
 0E = Boss Battle 1
-0F = Title Screen
+0F = Title Screen (No Loop)
 10 = Stage Select
-11 = Victory Jingle !
-12 = Stage Start Jingle
+11 = Victory Jingle ! (No Loop)
+12 = Stage Selected Jingle (No Loop)
 13 = Boss Battle 2 Intro tension
 14 = Boss Battle 2
 15 = Zero Appears
 16 = Zero Talks
-17 = Got a Weapon
+17 = Got a Weapon (No Loop)
 18 = Password
 19 = Simga Stage Select
 1A = Simga Battle 1
@@ -180,22 +187,3 @@ $80/8744 D0 E4       BNE $E4    [$872A]      A:0000 X:0007 Y:4894 P:enVMxdizC
 =====================
 = Scratch           =
 =====================
-$80/87B0 E2 30       SEP #$30                A:0116 X:000E Y:0006 P:envmXdiZc
-$80/87B0 E2 30       SEP #$30                A:0117 X:000E Y:0007 P:envmXdiZc
-$80/87B0 E2 30       SEP #$30                A:011F X:00A0 Y:0000 P:envMXdizC
-$80/87B0 E2 30       SEP #$30                A:011F X:00A0 Y:0000 P:envMXdizC
-$80/87B0 E2 30       SEP #$30                A:011F X:00A0 Y:0000 P:envMXdizC
-$80/87B0 E2 30       SEP #$30                A:0111 X:0000 Y:0001 P:envMXdiZC
-$80/87B0 E2 30       SEP #$30                A:0123 X:0004 Y:00B9 P:envmXdiZc
-$80/87B0 E2 30       SEP #$30                A:0124 X:0008 Y:005D P:envmXdiZc
-$80/87B0 E2 30       SEP #$30                A:0124 X:0008 Y:005D P:envmXdiZc
-$80/87B0 E2 30       SEP #$30                A:0125 X:0002 Y:009E P:envmXdiZc
-$80/87B0 E2 30       SEP #$30                A:0125 X:0002 Y:009E P:envmXdiZc
-$80/87B0 E2 30       SEP #$30                A:C826 X:00F9 Y:0002 P:envmXdiZc
-$80/87B0 E2 30       SEP #$30                A:8028 X:00FF Y:0006 P:envmXdiZc
-$80/87B0 E2 30       SEP #$30                A:8028 X:00FF Y:0006 P:envmXdiZc
-$80/87B0 E2 30       SEP #$30                A:0020 X:0000 Y:0000 P:envmXdiZc
-$80/87B0 E2 30       SEP #$30                A:0022 X:0008 Y:0000 P:envMXdizC
-$80/87B0 E2 30       SEP #$30                A:0417 X:0000 Y:0001 P:envMXdiZC
-$80/87B0 E2 30       SEP #$30                A:0417 X:0000 Y:0001 P:envMXdiZC
-
