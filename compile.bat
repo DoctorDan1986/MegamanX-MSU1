@@ -10,6 +10,7 @@ rem mmx_msu1-16.wav selectionStart=126976 selectionEnd=813056
 wav2msu mmx_msu1_intro_stage.wav mmx_msu1-1.pcm
 wav2msu mmx_msu1_sting_chameleon.wav mmx_msu1-2.pcm
 wav2msu mmx_msu1_chill_penguin.wav mmx_msu1-7.pcm
+wav2msu mmx_msu1_spark_mandrill.wav mmx_msu1-8.pcm
 wav2msu mmx_msu1_storm_eagle.wav mmx_msu1-9.pcm
 wav2msu mmx_msu1_boss_battle_1.wav mmx_msu1-14.pcm
 wav2msu mmx_msu1_title_screen.wav mmx_msu1-15.pcm

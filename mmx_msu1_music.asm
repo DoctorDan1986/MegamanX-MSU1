@@ -18,8 +18,8 @@ org $8692B8
 	db "MSU1 Hack by DarkSho"
 
 ; Play Capcom Logo
-org $808613
-	jsr MSU_Main
+;org $808613
+;	jsr MSU_Main
 
 ; Play music from Options Screen, All music after level music, Password Screen, Stage Select
 org $8087AA
@@ -31,7 +31,7 @@ org $808D8F
 	
 ; Play music at level load
 org $809A2D
-	jsr MSU_Main
+	jmp MSU_Main
 
 ; Play stage selected jingle
 org $809709
@@ -56,7 +56,7 @@ MSU_Main:
 	
 MSUFound:
 	; Set volume
-	lda #$BE
+	lda #$60
 	sta !MSU_AUDIO_VOLUME
 	
 	; Set track
