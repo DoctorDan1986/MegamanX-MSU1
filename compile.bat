@@ -12,6 +12,8 @@ wav2msu mmx_msu1_sting_chameleon.wav mmx_msu1-2.pcm
 wav2msu mmx_msu1_chill_penguin.wav mmx_msu1-7.pcm
 wav2msu mmx_msu1_spark_mandrill.wav mmx_msu1-8.pcm
 wav2msu mmx_msu1_storm_eagle.wav mmx_msu1-9.pcm
+wav2msu mmx_msu1_sigma_stage_2.wav mmx_msu1-11.pcm
+wav2msu mmx_msu1_sigma_stage_4.wav mmx_msu1-13.pcm
 wav2msu mmx_msu1_boss_battle_1.wav mmx_msu1-14.pcm
 wav2msu mmx_msu1_title_screen.wav mmx_msu1-15.pcm
 wav2msu mmx_msu1-16.wav -l 126976
