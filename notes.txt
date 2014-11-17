@@ -1,3 +1,13 @@
+=======================
+= TODO                =
+=======================
+* Fade-in/Fade-out
+* Reduce volume when going to pause menu
+* Hook capsule music ?
+
+=======================
+= Information         =
+=======================
 LoROM 16MBit
 
 7EFFC8 = BGM en memoire (Options screen)
@@ -189,6 +199,7 @@ $80/8744 D0 E4       BNE $E4    [$872A]      A:0000 X:0007 Y:4894 P:enVMxdizC
 ; La même commande pour jouer des sons envoie des commandes spécials
 $F0 = ??? 
 $F1 = ??? (Stop sound ?)
+$F5 = Resume ?
 $F6 = ??? (Stop All ?)
 $F7 = ???
 $FE = ???

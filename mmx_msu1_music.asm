@@ -46,6 +46,10 @@ org $809709
 org $809CFA
 	jsr MSU_Main
 
+; Got a weapon
+org $80ABD6
+	jsr MSU_Main
+
 ; A = Music to play + $10
 org $80FBCE
 MSU_Main:
