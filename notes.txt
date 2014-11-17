@@ -19,7 +19,6 @@ ABD6 ; ???????
 Ne pas oublier que certaines musiques pause la musique en cours et ne call pas $87B0 (ex: Dr Light capsule)
 
 PlayMusicRoutine PC = 0x7b0
-Free Space = 0x60b4d / $8C:8B4D
 
 =====================
 = Music             =
@@ -184,6 +183,12 @@ $80/8741 E2 20       SEP #$20                A:0000 X:0008 Y:4894 P:enVmxdiZC
 $80/8743 CA          DEX                     A:0000 X:0008 Y:4894 P:enVMxdiZC
 $80/8744 D0 E4       BNE $E4    [$872A]      A:0000 X:0007 Y:4894 P:enVMxdizC
 
-=====================
-= Scratch           =
-=====================
+======================================
+= Fade-in,out,stop research          =
+======================================
+; La même commande pour jouer des sons envoie des commandes spécials
+$F0 = ??? 
+$F1 = ??? (Stop sound ?)
+$F6 = ??? (Stop All ?)
+$F7 = ???
+$FE = ???
