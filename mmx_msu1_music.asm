@@ -1,11 +1,14 @@
 lorom
 
+; MSU memory map I/O
 MSU_STATUS = $2000
 MSU_ID = $2002
 MSU_AUDIO_TRACK_LO = $2004
 !MSU_AUDIO_TRACK_HI = $2005
 !MSU_AUDIO_VOLUME = $2006
 !MSU_AUDIO_CONTROL = $2007
+
+; SPC communication ports
 SPC_PORT_0 = $2140
 
 ; MSU_STATUS possible values
@@ -14,6 +17,10 @@ MSU_STATUS_AUDIO_PLAYING = %00010000
 MSU_STATUS_AUDIO_REPEAT  = %00100000
 MSU_STATUS_AUDIO_BUSY    = $40
 MSU_STATUS_DATA_BUSY     = %10000000
+
+; Constants
+FULL_VOLUME = $60
+DUCKED_VOLUME = $30
 
 org $8692B8
 	db "MSU1 Hack by DarkSho"
@@ -69,8 +76,8 @@ MSU_Main:
 	
 .MSUFound:
 	; Set volume
-	lda #$60
-	sta !MSU_AUDIO_VOLUME
+	lda.b #FULL_VOLUME
+	sta.w !MSU_AUDIO_VOLUME
 	
 	; Set track
 	tya
@@ -151,6 +158,12 @@ MSU_SoundEffectsAndCommand:
 	; $F6 is a command to fade-out music (currently stopping it)
 	cmp #$F6
 	beq .StopMusic
+	; $FE is a command to raise volume back to full volume coming from pause menu
+	cmp #$FE
+	beq .RaiseVolume
+	; $FF is a command to drop volume when going to pause menu
+	cmp #$FF
+	beq .DropVolume
 	; If not, play the sound as the game excepts to
 	bra .PlaySound
 	
@@ -175,6 +188,18 @@ MSU_SoundEffectsAndCommand:
 	sta !MSU_AUDIO_CONTROL
 	bra .CleanupAndReturn
 
+.RaiseVolume:
+	sta.w SPC_PORT_0
+	lda.b #FULL_VOLUME
+	sta.w !MSU_AUDIO_VOLUME
+	bra .CleanupAndReturn
+	
+.DropVolume:
+	sta.w SPC_PORT_0
+	lda.b #DUCKED_VOLUME
+	sta.w !MSU_AUDIO_VOLUME
+	bra .CleanupAndReturn
+	
 .MSUNotFound_SE:
 	pla
 .PlaySound:

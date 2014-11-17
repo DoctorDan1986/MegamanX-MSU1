@@ -2,7 +2,6 @@
 = TODO                =
 =======================
 * Fade-in/Fade-out
-* Reduce volume when going to pause menu
 * Hook capsule music ?
 
 =======================
@@ -24,7 +23,7 @@ $80:8D8F ; Title Screen play sound (8CB5)
 9A2D ; Level music (C'est un JMP)
 9709 ; Stage Intro Jingle
 9CFA ; ???????
-ABD6 ; ???????
+ABD6 ; Got a Weapon
 
 Ne pas oublier que certaines musiques pause la musique en cours et ne call pas $87B0 (ex: Dr Light capsule)
 
@@ -202,4 +201,5 @@ $F1 = ??? (Stop sound ?)
 $F5 = Resume ?
 $F6 = ??? (Stop All ?)
 $F7 = ???
-$FE = ???
+$FE = Raise volume
+$FF = Drop volume
