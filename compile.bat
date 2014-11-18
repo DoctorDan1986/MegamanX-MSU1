@@ -24,5 +24,3 @@ wav2msu mmx_msu1_password.wav mmx_msu1-24.pcm
 wav2msu mmx_msu1_ending_theme.wav mmx_msu1-28.pcm
 wav2msu mmx_msu1_cast_roll.wav mmx_msu1-29.pcm
 wav2msu mmx_msu1_boss_tension_1.wav mmx_msu1-30.pcm
-
-cls

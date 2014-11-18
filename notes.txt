@@ -1,7 +1,7 @@
 =======================
 = TODO                =
 =======================
-* Fade-in/Fade-out
+* Set initial fade value on reset
 * Hook capsule music ?
 
 =======================
@@ -28,6 +28,12 @@ ABD6 ; Got a Weapon
 Ne pas oublier que certaines musiques pause la musique en cours et ne call pas $87B0 (ex: Dr Light capsule)
 
 PlayMusicRoutine PC = 0x7b0
+
+; Place où se hooker pour le fade-in/fade-out dans le NMI
+; C'est la variable qui set le vrai frame counter
+$80/817A EE 9E 0B    INC $0B9E  [$80:0B9E]   A:0000 X:00D1 Y:0000 P:eNvMXdIzC
+
+$7E:7C00
 
 =====================
 = Music             =

@@ -22,9 +22,26 @@ MSU_STATUS_DATA_BUSY     = %10000000
 FULL_VOLUME = $60
 DUCKED_VOLUME = $30
 
+FADE_TIME = $31
+FADE_DELTA = 2
+
+; Variables
+fadeState = $7E7C00
+fadeCounter = $7E7C01
+fadeVolume = $7E7C02
+
+; FADE_STATE possibles values
+FADE_STATE_IDLE = $00
+FADE_STATE_FADEOUT = $01
+FADE_STATE_FADEIN = $02
+
 org $8692B8
 	db "MSU1 Hack by DarkSho"
 
+; Fade-in/Fade-out hack in NMI routine
+org $80817A
+	jsr MSU_FadeUpdate
+	
 ; Add a hook to where the sound effects/special commands are played
 org $80885B
 	jsr MSU_SoundEffectsAndCommand
@@ -69,7 +86,7 @@ MSU_Main:
 	sep #$30 ; Set all registers to 8 bit mode
 	tay
 	
-	; Check if MSU is present
+	; Check if MSU-1 is present
 	lda MSU_ID
 	cmp #'S'
 	bne .MSUNotFound
@@ -87,6 +104,7 @@ MSU_Main:
 	sta MSU_AUDIO_TRACK_LO
 	stz !MSU_AUDIO_TRACK_HI
 
+	; Check if track is missing
 	lda MSU_STATUS
 	and.b #MSU_STATUS_TRACK_MISSING
 	bne .MSUNotFound
@@ -100,6 +118,11 @@ MSU_Main:
 	; Play the song and add repeat if needed
 	jsr TrackNeedLooping
 	sta !MSU_AUDIO_CONTROL
+	
+	; Reset the fade state machine
+	lda #$00
+	sta fadeState
+	sta fadeCounter
 
 	rep #$30
 	ply
@@ -107,6 +130,7 @@ MSU_Main:
 	plp
 	rts
 	
+; Call original routine if MSU-1 is not found
 .MSUNotFound:
 	rep #$30
 	ply
@@ -168,12 +192,18 @@ MSU_SoundEffectsAndCommand:
 	bra .PlaySound
 	
 .ResumeMusic:
+	; Stop the SPC music if any
 	lda #$F6
 	sta SPC_PORT_0
 	
-	; TODO: Fade-in ?
+	; Resume music then fade-in to full volume
 	lda #$03
 	sta !MSU_AUDIO_CONTROL
+	lda.b #FADE_STATE_FADEIN
+	sta fadeState
+	lda #$00
+	sta fadeCounter
+	sta fadeVolume
 	bra .CleanupAndReturn
 
 .StopMusic:
@@ -183,9 +213,13 @@ MSU_SoundEffectsAndCommand:
 	and.b #MSU_STATUS_AUDIO_PLAYING
 	beq .CleanupAndReturn
 
-	; Stop current music (TODO: Fade-out)
-	lda #$00
-	sta !MSU_AUDIO_CONTROL
+	; Fade-out current music then stop it
+	lda.b #FADE_STATE_FADEOUT
+	sta fadeState
+	lda.b #FADE_TIME
+	sta fadeCounter
+	lda.b #FULL_VOLUME
+	sta fadeVolume
 	bra .CleanupAndReturn
 
 .RaiseVolume:
@@ -205,5 +239,66 @@ MSU_SoundEffectsAndCommand:
 .PlaySound:
 	sta SPC_PORT_0
 .CleanupAndReturn:
+	plp
+	rts
+	
+MSU_FadeUpdate:
+	; Original code I hijacked that increase the real frame counter
+	inc.w $0B9E
+	
+	php
+	pha
+	
+	sep #$30
+	
+	lda MSU_ID
+	cmp #'S'
+	bne .MSUNotFound
+	
+	; Switch on fade state
+	lda fadeState
+	cmp.b #FADE_STATE_IDLE
+	beq .MSUNotFound
+	cmp.b #FADE_STATE_FADEOUT
+	beq .FadeOutUpdate
+	cmp.b #FADE_STATE_FADEIN
+	beq .FadeInUpdate
+	bra .MSUNotFound
+	
+.FadeOutUpdate:
+	lda fadeCounter
+	dec
+	beq .SetToIdleAndStop
+	sta fadeCounter
+	
+	lda fadeVolume
+	sec
+	sbc.b #FADE_DELTA
+	sta fadeVolume
+	sta.w !MSU_AUDIO_VOLUME
+	bra .MSUNotFound
+	
+.FadeInUpdate:
+	lda fadeCounter
+	inc
+	cmp.b #FADE_TIME
+	beq .SetToIdle
+	sta fadeCounter
+	
+	lda fadeVolume
+	clc
+	adc.b #FADE_DELTA
+	sta fadeVolume
+	sta.w !MSU_AUDIO_VOLUME
+	bra .MSUNotFound
+
+.SetToIdleAndStop:
+	stz !MSU_AUDIO_CONTROL
+.SetToIdle:
+	lda.b #FADE_STATE_IDLE
+	sta fadeState
+
+.MSUNotFound
+	pla
 	plp
 	rts
