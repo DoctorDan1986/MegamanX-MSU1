@@ -19,11 +19,11 @@ MSU_STATUS_AUDIO_BUSY    = $40
 MSU_STATUS_DATA_BUSY     = %10000000
 
 ; Constants
-FULL_VOLUME = $60
-DUCKED_VOLUME = $30
+FULL_VOLUME = $C0
+DUCKED_VOLUME = $60
 
 FADE_TIME = $31
-FADE_DELTA = 2
+FADE_DELTA = 4
 
 ; Variables
 fadeState = $7E7C00
@@ -38,7 +38,7 @@ FADE_STATE_FADEIN = $02
 org $8692B8
 	db "MSU1 Hack DarkShock "
 
-; Fade-in/Fade-out hack in NMI routine
+; Fade-in/Fade-out hijack in NMI routine
 org $80817A
 	jsr MSU_FadeUpdate
 	
@@ -48,7 +48,7 @@ org $80885B
 
 ; Play Capcom Logo
 org $808613
-	jsr MSU_Main
+	jsr MSU_Init
 
 ; Play music from Options Screen, All music after level music, Password Screen, Stage Select
 org $8087AA
@@ -139,7 +139,34 @@ MSU_Main:
 	
 	jsr $87B0
 	rts
+
+MSU_Init:
+	php
+	sep #$30
+	pha
 	
+	; Check if MSU-1 is present
+	lda MSU_ID
+	cmp #'S'
+	bne .MSUNotFound
+	
+	; Set volume
+	lda.b #FULL_VOLUME
+	sta.w !MSU_AUDIO_VOLUME
+	
+	; Reset the fade state machine
+	lda.b #$00
+	sta.l fadeState
+	sta.l fadeCounter
+	
+.MSUNotFound
+	pla
+	plp
+	
+	jsr $87B0
+	
+	rts
+
 TrackNeedLooping:
 ; Capcom Jingle
 	cpy #$00
@@ -247,9 +274,8 @@ MSU_FadeUpdate:
 	inc.w $0B9E
 	
 	php
-	pha
-	
 	sep #$30
+	pha
 	
 	lda MSU_ID
 	cmp #'S'
