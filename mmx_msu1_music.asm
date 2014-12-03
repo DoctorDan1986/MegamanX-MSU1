@@ -92,10 +92,6 @@ MSU_Main:
 	bne .MSUNotFound
 	
 .MSUFound:
-	; Set volume
-	lda.b #FULL_VOLUME
-	sta.w !MSU_AUDIO_VOLUME
-	
 	; Set track
 	tya
 	clc
@@ -104,16 +100,20 @@ MSU_Main:
 	sta MSU_AUDIO_TRACK_LO
 	stz !MSU_AUDIO_TRACK_HI
 
-	; Check if track is missing
-	lda MSU_STATUS
-	and.b #MSU_STATUS_TRACK_MISSING
-	bne .MSUNotFound
-	
 .CheckAudioStatus
 	lda MSU_STATUS
 	
 	and.b #MSU_STATUS_AUDIO_BUSY
 	bne .CheckAudioStatus
+	
+	; Check if track is missing
+	lda MSU_STATUS
+	and.b #MSU_STATUS_TRACK_MISSING
+	bne .MSUNotFound
+	
+	; Set volume
+	lda.b #FULL_VOLUME
+	sta.w !MSU_AUDIO_VOLUME
 	
 	; Play the song and add repeat if needed
 	jsr TrackNeedLooping
