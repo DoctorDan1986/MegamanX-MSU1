@@ -1,7 +1,6 @@
 =======================
 = TODO                =
 =======================
-* Set initial fade value on reset
 * Hook capsule music ?
 
 =======================

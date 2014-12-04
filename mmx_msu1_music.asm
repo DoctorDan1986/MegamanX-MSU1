@@ -19,15 +19,13 @@ MSU_STATUS_AUDIO_BUSY    = $40
 MSU_STATUS_DATA_BUSY     = %10000000
 
 ; Constants
-FULL_VOLUME = $C0
+FULL_VOLUME = $FF
 DUCKED_VOLUME = $60
 
-FADE_TIME = $31
-FADE_DELTA = 4
+FADE_DELTA = ($FF/45)
 
 ; Variables
 fadeState = $7E7C00
-fadeCounter = $7E7C01
 fadeVolume = $7E7C02
 
 ; FADE_STATE possibles values
@@ -35,6 +33,7 @@ FADE_STATE_IDLE = $00
 FADE_STATE_FADEOUT = $01
 FADE_STATE_FADEIN = $02
 
+; TODO: Remove that
 org $8692B8
 	db "MSU1 Hack DarkShock "
 
@@ -46,7 +45,7 @@ org $80817A
 org $80885B
 	jsr MSU_SoundEffectsAndCommand
 
-; Play Capcom Logo
+; At Capcom logo, init the required variables
 org $808613
 	jsr MSU_Init
 
@@ -111,19 +110,18 @@ MSU_Main:
 	and.b #MSU_STATUS_TRACK_MISSING
 	bne .MSUNotFound
 	
-	; Set volume
-	lda.b #FULL_VOLUME
-	sta.w !MSU_AUDIO_VOLUME
-	
 	; Play the song and add repeat if needed
 	jsr TrackNeedLooping
 	sta !MSU_AUDIO_CONTROL
 	
+	; Set volume
+	lda.b #FULL_VOLUME
+	sta.w !MSU_AUDIO_VOLUME
+	
 	; Reset the fade state machine
 	lda #$00
 	sta fadeState
-	sta fadeCounter
-
+	
 	rep #$30
 	ply
 	pla
@@ -157,8 +155,7 @@ MSU_Init:
 	; Reset the fade state machine
 	lda.b #$00
 	sta.l fadeState
-	sta.l fadeCounter
-	
+
 .MSUNotFound
 	pla
 	plp
@@ -206,7 +203,7 @@ MSU_SoundEffectsAndCommand:
 	; $F5 is a command to resume music
 	cmp #$F5
 	beq .ResumeMusic
-	; $F6 is a command to fade-out music (currently stopping it)
+	; $F6 is a command to fade-out music
 	cmp #$F6
 	beq .StopMusic
 	; $FE is a command to raise volume back to full volume coming from pause menu
@@ -229,7 +226,6 @@ MSU_SoundEffectsAndCommand:
 	lda.b #FADE_STATE_FADEIN
 	sta fadeState
 	lda #$00
-	sta fadeCounter
 	sta fadeVolume
 	bra .CleanupAndReturn
 
@@ -243,8 +239,6 @@ MSU_SoundEffectsAndCommand:
 	; Fade-out current music then stop it
 	lda.b #FADE_STATE_FADEOUT
 	sta fadeState
-	lda.b #FADE_TIME
-	sta fadeCounter
 	lda.b #FULL_VOLUME
 	sta fadeVolume
 	bra .CleanupAndReturn
@@ -292,34 +286,30 @@ MSU_FadeUpdate:
 	bra .MSUNotFound
 	
 .FadeOutUpdate:
-	lda fadeCounter
-	dec
-	beq .SetToIdleAndStop
-	sta fadeCounter
-	
 	lda fadeVolume
 	sec
 	sbc.b #FADE_DELTA
+	bcs +
+	lda #$0
++
 	sta fadeVolume
 	sta.w !MSU_AUDIO_VOLUME
+	beq .SetToIdle
 	bra .MSUNotFound
 	
 .FadeInUpdate:
-	lda fadeCounter
-	inc
-	cmp.b #FADE_TIME
-	beq .SetToIdle
-	sta fadeCounter
-	
 	lda fadeVolume
 	clc
 	adc.b #FADE_DELTA
+	bcc +
+	lda.b #FULL_VOLUME
++
 	sta fadeVolume
 	sta.w !MSU_AUDIO_VOLUME
+	cmp.b #FULL_VOLUME
+	beq .SetToIdle
 	bra .MSUNotFound
 
-.SetToIdleAndStop:
-	stz !MSU_AUDIO_CONTROL
 .SetToIdle:
 	lda.b #FADE_STATE_IDLE
 	sta fadeState
