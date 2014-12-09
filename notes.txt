@@ -34,6 +34,9 @@ $80/817A EE 9E 0B    INC $0B9E  [$80:0B9E]   A:0000 X:00D1 Y:0000 P:eNvMXdIzC
 
 $7E:7C00
 
+Copy protection:
+http://jul.rustedlogic.net/thread.php?pid=433506
+
 =====================
 = Music             =
 =====================
@@ -208,3 +211,85 @@ $F6 = ??? (Stop All ?)
 $F7 = ???
 $FE = Raise volume
 $FF = Drop volume
+
+======================================
+= Copy protection                    =
+======================================
+; All offsets are for the 1.1 version of the game
+; $84/A472 (when destroying an enemy)
+$84/A472 AF 00 10 70 LDA $701000[$70:1000]   A:0000 X:1928 Y:0008 P:envMxdiZc
+$84/A476 1A          INC A                   A:0060 X:1928 Y:0008 P:envMxdizc
+$84/A477 8F 00 10 70 STA $701000[$70:1000]   A:0061 X:1928 Y:0008 P:envMxdizc
+$84/A47B CF 00 10 70 CMP $701000[$70:1000]   A:0061 X:1928 Y:0008 P:envMxdizc
+$84/A47F F0 0A       BEQ $0A    [$A48B]      A:0061 X:1928 Y:0008 P:envMxdizC
+$84/A481 CE 9D 1F    DEC $1F9D  [$86:1F9D]   A:0061 X:1928 Y:0008 P:envMxdizC
+
+; 84A3C4 (A2): if byte at $84A47F != $84A3CC (A1 tampered), increase $1F9D (when destroying an enemy)
+$84/A3C4 AF 7F A4 84 LDA $84A47F[$84:A47F]   A:D900 X:0000 Y:0000 P:enVMXdiZc
+$84/A3C8 CF CC A3 84 CMP $84A3CC[$84:A3CC]   A:D9F0 X:0000 Y:0000 P:eNVMXdizc
+$84/A3CC F0 03       BEQ $03    [$A3D1]      A:D9F0 X:0000 Y:0000 P:enVMXdiZC
+$84/A3D1 6B          RTL                     A:D9F0 X:0000 Y:0000 P:enVMXdiZC
+
+; 848FCD (A3): if byte at $84A48B != $849D2E (A2 tampered), increase $1F9D (every frame, wrapping FF->00)
+$84/8FCD AF 8B A4 84 LDA $84A48B[$84:A48B]   A:1281 X:0000 Y:0002 P:eNvMXdizc
+$84/8FD1 CF 2E 9D 84 CMP $849D2E[$84:9D2E]   A:12EE X:0000 Y:0002 P:eNvMXdizc
+$84/8FD5 F0 03       BEQ $03    [$8FDA]      A:12EE X:0000 Y:0002 P:envMXdiZC
+$84/8FDA A5 17       LDA $17    [$00:123F]   A:12EE X:0000 Y:0002 P:envMXdiZC
+
+; $81852B (B1): if $700804 (SRAM) is mapped, increase $1F9E (when X begins falling)
+$81/852B AF 04 08 70 LDA $700804[$70:0804]   A:0008 X:0000 Y:009A P:enVMXdiZc
+$81/852F 1A          INC A                   A:0060 X:0000 Y:009A P:enVMXdizc
+$81/8530 8F 04 08 70 STA $700804[$70:0804]   A:0061 X:0000 Y:009A P:enVMXdizc
+$81/8534 CF 04 08 70 CMP $700804[$70:0804]   A:0061 X:0000 Y:009A P:enVMXdizc
+$81/8538 F0 0A       BEQ $0A    [$8544]      A:0061 X:0000 Y:009A P:enVMXdizC
+$81/853A CE 9E 1F    DEC $1F9E  [$86:1F9E]   A:0061 X:0000 Y:009A P:enVMXdizC
+
+; 819602 (B2): if word at $81853B != #$1F9E (B1 tampered), increase $1F9E (when jumping)
+$81/960C AF 45 85 81 LDA $818545[$81:8545]   A:0178 X:0012 Y:009B P:enVmXdizC
+$81/9610 C9 9E 1F    CMP #$1F9E              A:1F9E X:0012 Y:009B P:enVmXdizC
+$81/9613 F0 06       BEQ $06    [$961B]      A:1F9E X:0012 Y:009B P:enVmXdiZC
+$81/961B E2 20       SEP #$20                A:1F9E X:0012 Y:009B P:enVmXdiZC
+
+; 819438 (B3): if byte at $809E5F != $818544 (B1 tampered), $1F9E |= 128 immediately (when firing)
+$81/9438 AF 5F 9E 80 LDA $809E5F[$80:9E5F]   A:0000 X:0002 Y:0040 P:envMXdiZc
+$81/943C CF 44 85 81 CMP $818544[$81:8544]   A:00EE X:0002 Y:0040 P:eNvMXdizc
+$81/9440 F0 05       BEQ $05    [$9447]      A:00EE X:0002 Y:0040 P:envMXdiZC
+$81/9447 A5 35       LDA $35    [$00:0BDD]   A:00EE X:0002 Y:0040 P:envMXdiZC
+$81/9449 C5 67       CMP $67    [$00:0C0F]   A:0000 X:0002 Y:0040 P:envMXdiZC
+
+; 819950 (B4): if byte at $81853D != $819674 (B1 tampered), $1F9E |= 128 immediately (when jumping)
+$81/995A AF 3D 85 81 LDA $81853D[$81:853D]   A:0540 X:0012 Y:009B P:enVMXdizc
+$81/995E CF 74 96 81 CMP $819674[$81:9674]   A:0510 X:0012 Y:009B P:enVMXdizc
+$81/9962 F0 05       BEQ $05    [$9969]      A:0510 X:0012 Y:009B P:enVMXdiZC
+$81/9969 60          RTS                     A:0510 X:0012 Y:009B P:enVMXdiZC
+
+; 849D07 (C1): if $700505 (SRAM) is mapped, increase $1F9F (when X takes damage)
+$84/9D07 AF 05 05 70 LDA $700505[$70:0505]   A:0021 X:0BA8 Y:0008 P:enVMxdizC
+$84/9D0B 1A          INC A                   A:0060 X:0BA8 Y:0008 P:enVMxdizC
+$84/9D0C 8F 05 05 70 STA $700505[$70:0505]   A:0061 X:0BA8 Y:0008 P:enVMxdizC
+$84/9D10 CF 05 05 70 CMP $700505[$70:0505]   A:0061 X:0BA8 Y:0008 P:enVMxdizC
+$84/9D14 F0 0A       BEQ $0A    [$9D20]      A:0061 X:0BA8 Y:0008 P:enVMxdizC
+$84/9D16 CE 9F 1F    DEC $1F9F  [$86:1F9F]   A:0061 X:0BA8 Y:0008 P:enVMxdizC
+$84/9D19 10 0D       BPL $0D    [$9D28]      A:0061 X:0BA8 Y:0008 P:eNVMxdizC
+$84/9D1B 9C 9F 1F    STZ $1F9F  [$86:1F9F]   A:0061 X:0BA8 Y:0008 P:eNVMxdizC
+$84/9D1E 80 08       BRA $08    [$9D28]      A:0061 X:0BA8 Y:0008 P:eNVMxdizC
+$84/9D28 A5 26       LDA $26    [$00:0E8E]   A:0061 X:0BA8 Y:0008 P:eNVMxdizC
+$84/9D2A F0 52       BEQ $52    [$9D7E]      A:0003 X:0BA8 Y:0008 P:enVMxdizC
+$84/9D2A F0 52       BEQ $52    [$9D7E]      A:0003 X:0BA8 Y:0008 P:enVMxdizC
+
+; 849F97 (C2): if byte at $849D0A != $849AF5 or $849D0E (C1 tampered), $1F9F |= 128 immediately (when X gains health)
+;	when this is >= 128 , start spamming bogus controller input every frame
+$84/9F9C AF 0F 9D 84 LDA $849D0F[$84:9D0F]   A:FF18 X:0002 Y:007B P:envMXdizc
+$84/9FA0 CF F5 9A 84 CMP $849AF5[$84:9AF5]   A:FF70 X:0002 Y:007B P:envMXdizc
+$84/9FA4 F0 0B       BEQ $0B    [$9FB1]      A:FF70 X:0002 Y:007B P:envMXdiZC
+
+; 81816B (D1): if $700800 (SRAM) is mapped, increase $0C2B (dp+$83) (every frame)
+;	effect unknown
+$81/816B AF 00 08 70 LDA $700800[$70:0800]   A:0004 X:0018 Y:0004 P:enVMXdizc
+$81/816F 1A          INC A                   A:0060 X:0018 Y:0004 P:enVMXdizc
+$81/8170 8F 00 08 70 STA $700800[$70:0800]   A:0061 X:0018 Y:0004 P:enVMXdizc
+$81/8174 CF 00 08 70 CMP $700800[$70:0800]   A:0061 X:0018 Y:0004 P:enVMXdizc
+$81/8178 F0 08       BEQ $08    [$8182]      A:0061 X:0018 Y:0004 P:enVMXdizC
+$81/817A C6 83       DEC $83    [$00:0C2B]   A:0061 X:0018 Y:0004 P:enVMXdizC
+$81/817C 10 06       BPL $06    [$8184]      A:0061 X:0018 Y:0004 P:eNVMXdizC
+$81/817E 64 83       STZ $83    [$00:0C2B]   A:0061 X:0018 Y:0004 P:eNVMXdizC
