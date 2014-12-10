@@ -21,6 +21,4 @@ For the name of the .wav files, look in the make.bat file. Right now I'm using a
 ========
 = TODO =
 ========
-* Find a suitable RAM location for my two variables
-* Complete a full game on higan
 * Fix issues with bsnes manifest file

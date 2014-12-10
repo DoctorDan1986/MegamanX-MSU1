@@ -25,8 +25,8 @@ DUCKED_VOLUME = $60
 FADE_DELTA = ($FF/45)
 
 ; Variables
-fadeState = $7E7C00
-fadeVolume = $7E7C02
+fadeState = $180
+fadeVolume = $181
 
 ; FADE_STATE possibles values
 FADE_STATE_IDLE = $00
