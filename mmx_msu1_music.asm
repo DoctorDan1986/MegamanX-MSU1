@@ -33,10 +33,6 @@ FADE_STATE_IDLE = $00
 FADE_STATE_FADEOUT = $01
 FADE_STATE_FADEIN = $02
 
-; TODO: Remove that
-org $8692B8
-	db "MSU1 Hack DarkShock "
-
 ; Fade-in/Fade-out hijack in NMI routine
 org $80817A
 	jsr MSU_FadeUpdate
